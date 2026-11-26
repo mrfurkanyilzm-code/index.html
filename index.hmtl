@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sana Bir Sorum Var... 💖</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Poppins & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+            display: ['Poppins', 'sans-serif'],
+          },
+          animation: {
+            'float-slow': 'floatSlow 3.5s ease-in-out infinite',
+            'pulse-soft': 'pulseSoft 1.8s ease-in-out infinite',
+            'bounce-gentle': 'bounceGentle 2s infinite',
+          },
+          keyframes: {
+            floatSlow: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseSoft: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.08)' },
+            },
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(-4%)' },
+              '50%': { transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Arka plan pastel sıcak gradyan (pembe, gül kurusu ve krem tonları) */
+    body {
+      background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 35%, #fef3c7 75%, #fce7f3 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Sürekli yukarı doğru süzülen kalpler için animasyon */
+    .floating-heart {
+      position: fixed;
+      bottom: -50px;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      animation: riseHeart var(--duration, 10s) linear var(--delay, 0s) infinite;
+      opacity: 0;
+    }
+
+    @keyframes riseHeart {
+      0% {
+        transform: translateY(0) scale(0.7) rotate(0deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: var(--max-opacity, 0.55);
+      }
+      85% {
+        opacity: var(--max-opacity, 0.55);
+      }
+      100% {
+        transform: translateY(-112vh) scale(1.15) rotate(25deg);
+        opacity: 0;
+      }
+    }
+
+    /* Buzlu cam kart efekti */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 20px 50px -12px rgba(244, 63, 94, 0.18), 0 8px 20px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Kaçan Hayır butonu yumuşak geçişi */
+    #no-btn {
+      transition: left 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  top 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.15s ease,
+                  background-color 0.2s ease;
+    }
+
+    /* Bilet kenar çentikleri */
+    .ticket-notch-left, .ticket-notch-right {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: #ffe4e6;
+      border-radius: 9999px;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: inset 0 2px 4px rgba(225, 29, 72, 0.12);
+    }
+    .ticket-notch-left { left: -12px; }
+    .ticket-notch-right { right: -12px; }
+
+    /* Hızlı seçim hapları (pills) aktif durumu */
+    .pill-btn.active {
+      background: linear-gradient(135deg, #f43f5e, #ec4899);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 6px 14px -3px rgba(244, 63, 94, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* Resmi Bilet Onay Damgası */
+    .approved-stamp {
+      transform: rotate(-8deg);
+      border: 2.5px solid #e11d48;
+      color: #e11d48;
+      letter-spacing: 0.12em;
+    }
+  </style>
+</head>
+<body class="relative flex items-center justify-center p-4 sm:p-6">
+
+  <!-- Arka Plan Süzülen Kalpler Katmanı -->
+  <div id="hearts-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+  <!-- Konfeti ve Kalp Patlaması Canvas -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- ANA KART KONTEYNERİ -->
+  <main class="relative z-10 w-full max-w-lg mx-auto my-auto">
+
+    <!-- =========================================================
+         1. AŞAMA: SORU VE KAÇAN 'HAYIR' BUTONU
+         ========================================================= -->
+    <section
+      id="question-card"
+      class="glass-card rounded-3xl p-6 sm:p-10 text-center transition-all duration-500 select-none"
+    >
+      <!-- Sevimli Animasyonlu Ayıcık ve Kalp SVG İllüstrasyonu -->
+      <div class="relative w-32 h-32 mx-auto mb-5 animate-float-slow">
+        <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="105" r="78" fill="#FFE4E6" opacity="0.85"/>
+          <circle cx="56" cy="58" r="22" fill="#D97706"/>
+          <circle cx="56" cy="58" r="12" fill="#FDE68A"/>
+          <circle cx="144" cy="58" r="22" fill="#D97706"/>
+          <circle cx="144" cy="58" r="12" fill="#FDE68A"/>
+          <ellipse cx="100" cy="96" rx="56" ry="48" fill="#F59E0B"/>
+          <ellipse cx="66" cy="104" rx="10" ry="6" fill="#FB7185" opacity="0.65"/>
+          <ellipse cx="134" cy="104" rx="10" ry="6" fill="#FB7185" opacity="0.65"/>
+          <circle cx="78" cy="88" r="6" fill="#1F2937"/>
+          <circle cx="80" cy="86" r="2" fill="#FFFFFF"/>
+          <circle cx="122" cy="88" r="6" fill="#1F2937"/>
+          <circle cx="124" cy="86" r="2" fill="#FFFFFF"/>
+          <ellipse cx="100" cy="104" rx="20" ry="15" fill="#FEF3C7"/>
+          <ellipse cx="100" cy="98" rx="7" ry="5" fill="#4B5563"/>
+          <path d="M92 108 Q100 116 108 108" stroke="#4B5563" stroke-width="3" stroke-linecap="round"/>
+          <path
+            d="M100 172 C100 172 62 146 62 124 C62 112 72 104 83 104 C91 104 97 109 100 115 C103 109 109 104 117 104 C128 104 138 112 138 124 C138 146 100 172 100 172 Z"
+            fill="#F43F5E"
+            class="origin-center animate-pulse-soft"
+          />
+          <path d="M74 118 C74 113 78 111 82 111" stroke="#FFE4E6" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="67" cy="134" r="11" fill="#D97706"/>
+          <circle cx="133" cy="134" r="11" fill="#D97706"/>
+        </svg>
+      </div>
+
+      <span class="inline-block px-3.5 py-1 mb-3 text-xs font-bold tracking-wide text-rose-600 uppercase bg-rose-100/90 rounded-full">
+        Çok Özel Bir Teklif ✨
+      </span>
+
+      <h1 class="font-display text-2xl sm:text-4xl font-extrabold text-slate-800 leading-tight mb-3">
+        Benimle date'e çıkar mısın? 💖
+      </h1>
+
+      <p id="sub-prompt" class="text-sm sm:text-base text-slate-600 mb-8 leading-relaxed">
+        Seninle kahve içmek, bolca gülmek ve harika bir gün geçirmek istiyorum. Ne dersin?
+      </p>
+
+      <!-- Butonlar Alanı -->
+      <div id="buttons-wrapper" class="flex flex-wrap items-center justify-center gap-4 min-h-[64px]">
+        <!-- EVET BUTONU -->
+        <button
+          id="yes-btn"
+          type="button"
+          class="px-7 py-3.5 rounded-2xl font-display font-bold text-white text-base sm:text-lg bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-500/35 hover:shadow-xl hover:shadow-rose-500/45 transition-all duration-200 active:scale-95 cursor-pointer z-20"
+        >
+          Evet 😍
+        </button>
+
+        <!-- HAYIR BUTONU -->
+        <button
+          id="no-btn"
+          type="button"
+          class="px-6 py-3.5 rounded-2xl font-bold text-slate-600 text-sm sm:text-base bg-white/90 hover:bg-white border border-slate-200 shadow-md cursor-pointer z-30 whitespace-nowrap"
+        >
+          Hayır 🙈
+        </button>
+      </div>
+
+      <p id="escape-hint" class="mt-5 text-xs font-semibold text-rose-500/90 h-4 transition-opacity duration-300 opacity-0">
+        İpucu: "Hayır" tuşu biraz utangaç galiba... 😉
+      </p>
+    </section>
+
+    <!-- =========================================================
+         2. AŞAMA: 'NEREDE?' VE 'NE ZAMAN?' SEÇİM FORMU
+         ========================================================= -->
+    <section
+      id="selection-card"
+      class="hidden glass-card rounded-3xl p-6 sm:p-8 transition-all duration-500 transform scale-95 opacity-0"
+    >
+      <div class="text-center mb-6">
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1 mb-2 text-xs font-bold text-rose-600 bg-rose-100/90 rounded-full">
+          <span>🥳</span> Yaşasın! Harika bir karar!
+        </span>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-800">
+          Şimdi Planı Sen Yap 💕
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">
+          Nereye gidelim ve ne zaman buluşalım? İstediğin gibi seç veya yaz:
+        </p>
+      </div>
+
+      <form id="date-choice-form" class="space-y-5" novalidate>
+        <!-- NEREDE? BÖLÜMÜ -->
+        <div class="bg-white/60 rounded-2xl p-4 border border-white/80">
+          <label for="where-input" class="block font-display text-sm sm:text-base font-bold text-slate-800 mb-2.5">
+            📍 Nerede buluşalım?
+          </label>
+
+          <!-- Hızlı Seçim Hapları (Nerede) -->
+          <div id="where-pills" class="flex flex-wrap gap-2 mb-3">
+            <button type="button" data-value="☕ Kahve & Tatlı" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              ☕ Kahve & Tatlı
+            </button>
+            <button type="button" data-value="🍝 Akşam Yemeği" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              🍝 Akşam Yemeği
+            </button>
+            <button type="button" data-value="🎬 Sinema" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              🎬 Sinema
+            </button>
+            <button type="button" data-value="🌊 Sahil Yürüyüşü" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              🌊 Sahil Yürüyüşü
+            </button>
+            <button type="button" data-value="🍔 Burger & Sohbet" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              🍔 Burger & Sohbet
+            </button>
+          </div>
+
+          <!-- Özel Mekan / Semt Girişi -->
+          <input
+            id="where-input"
+            type="text"
+            placeholder="Mekan veya semt yazabilirsin... (Örn: Moda Sahil / En sevdiğim kafe)"
+            class="w-full px-4 py-2.5 rounded-xl bg-white/95 border border-rose-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none text-sm text-slate-800 placeholder:text-slate-400 transition-all"
+          />
+          <p id="where-error" class="hidden text-xs font-semibold text-rose-600 mt-1.5">
+            Lütfen bir mekan seç veya nereye gitmek istediğini yaz 🥺
+          </p>
+        </div>
+
+        <!-- NE ZAMAN? BÖLÜMÜ -->
+        <div class="bg-white/60 rounded-2xl p-4 border border-white/80">
+          <label for="when-text-input" class="block font-display text-sm sm:text-base font-bold text-slate-800 mb-2.5">
+            🗓️ Ne zaman buluşalım?
+          </label>
+
+          <!-- Hızlı Seçim Hapları (Ne zaman) -->
+          <div id="when-pills" class="flex flex-wrap gap-2 mb-3">
+            <button type="button" data-value="Bu Akşam 🌙" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              Bu Akşam 🌙
+            </button>
+            <button type="button" data-value="Yarın ✨" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              Yarın ✨
+            </button>
+            <button type="button" data-value="Bu Hafta Sonu 🎉" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              Bu Hafta Sonu 🎉
+            </button>
+            <button type="button" data-value="Hafta İçi Akşam 🌇" class="pill-btn px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white/90 text-slate-700 border border-rose-200/80 hover:border-rose-400 transition-all cursor-pointer">
+              Hafta İçi Akşam 🌇
+            </button>
+          </div>
+
+          <!-- Tarih ve Saat Seçiciler -->
+          <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+            <div>
+              <label for="when-date-input" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                Tarih Seç (Opsiyonel)
+              </label>
+              <input
+                id="when-date-input"
+                type="date"
+                class="w-full px-3 py-2 rounded-xl bg-white/95 border border-rose-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none text-xs sm:text-sm text-slate-800"
+              />
+            </div>
+            <div>
+              <label for="when-time-input" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+                Saat Seç (Opsiyonel)
+              </label>
+              <input
+                id="when-time-input"
+                type="time"
+                class="w-full px-3 py-2 rounded-xl bg-white/95 border border-rose-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none text-xs sm:text-sm text-slate-800"
+              />
+            </div>
+          </div>
+
+          <!-- Serbest Metin Zaman Girişi -->
+          <input
+            id="when-text-input"
+            type="text"
+            placeholder="Veya gün ve saat yaz... (Örn: Cumartesi saat 19:30)"
+            class="w-full px-4 py-2.5 rounded-xl bg-white/95 border border-rose-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none text-sm text-slate-800 placeholder:text-slate-400 transition-all"
+          />
+          <p id="when-error" class="hidden text-xs font-semibold text-rose-600 mt-1.5">
+            Lütfen bir zaman seç veya gün/saat bilgisi gir ⏰
+          </p>
+        </div>
+
+        <!-- OPSİYONEL NOT BÖLÜMÜ -->
+        <div class="bg-white/60 rounded-2xl p-4 border border-white/80">
+          <label for="note-input" class="block font-display text-sm font-bold text-slate-800 mb-1.5">
+            💌 Küçük Bir Not (İsteğe Bağlı)
+          </label>
+          <input
+            id="note-input"
+            type="text"
+            placeholder="Eklemek istediğin bir şey var mı? 💌"
+            class="w-full px-4 py-2.5 rounded-xl bg-white/95 border border-rose-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none text-sm text-slate-800 placeholder:text-slate-400 transition-all"
+          />
+        </div>
+
+        <!-- ONAY BUTONU -->
+        <button
+          type="submit"
+          class="w-full py-3.5 px-6 rounded-2xl font-display font-bold text-white text-sm sm:text-base bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-500/30 hover:shadow-xl transition-all duration-200 active:scale-95 cursor-pointer"
+        >
+          Planı Onayla & Bileti Oluştur 🎟️
+        </button>
+      </form>
+    </section>
+
+    <!-- =========================================================
+         3. AŞAMA: RESMİ DATE BİLETİ VE GÖNDERİM EKRANI
+         ========================================================= -->
+    <section
+      id="ticket-card"
+      class="hidden glass-card rounded-3xl p-6 sm:p-9 text-center transition-all duration-500 transform scale-95 opacity-0"
+    >
+      <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center text-3xl shadow-lg shadow-rose-500/30 animate-bounce-gentle">
+        🎟️
+      </div>
+
+      <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1.5">
+        Date Planımız Hazır! 💖
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-600 mb-5">
+        Seçimlerinle resmi biletin oluşturuldu. Şimdi bana gönder!
+      </p>
+
+      <!-- PERFORE KENARLI RESMİ DATE BİLETİ -->
+      <div class="relative bg-gradient-to-br from-rose-50 via-white to-amber-50/80 rounded-2xl border-2 border-dashed border-rose-300 p-5 sm:p-6 text-left shadow-inner mb-6 overflow-hidden">
+        <!-- Bilet Yan Çentikleri -->
+        <div class="ticket-notch-left"></div>
+        <div class="ticket-notch-right"></div>
+
+        <!-- Üst Başlık ve Onay Damgası -->
+        <div class="flex items-start justify-between border-b border-rose-200/80 pb-3.5 mb-4 gap-2">
+          <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-widest text-rose-500">VIP DATE PASS</span>
+            <h3 class="font-display font-extrabold text-slate-800 text-lg sm:text-xl">Resmi Date Bileti 💕</h3>
+          </div>
+          <span class="approved-stamp px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-extrabold uppercase bg-rose-50/80 shadow-xs shrink-0">
+            ONAYLANDI 💖
+          </span>
+        </div>
+
+        <!-- Seçilen Detaylar -->
+        <div class="space-y-3.5 text-sm sm:text-base">
+          <div class="flex items-start gap-3">
+            <span class="text-xl leading-none mt-0.5">📍</span>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Nerede</p>
+              <p id="summary-where" class="font-bold text-slate-800 break-words">-</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <span class="text-xl leading-none mt-0.5">🗓️</span>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ne Zaman</p>
+              <p id="summary-when" class="font-bold text-slate-800 break-words">-</p>
+            </div>
+          </div>
+
+          <div id="summary-note-row" class="flex items-start gap-3">
+            <span class="text-xl leading-none mt-0.5">💌</span>
+            <div>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Notun</p>
+              <p id="summary-note" class="font-semibold text-slate-700 break-words">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-rose-200/80 flex items-center justify-between text-xs text-rose-600 font-bold">
+          <span>Geçerlilik: İkimiz İçin Özel ✨</span>
+          <span>İptal Edilemez 🔒</span>
+        </div>
+      </div>
+
+      <!-- Gönderim ve Kopyalama Butonları -->
+      <div class="space-y-3">
+        <!-- Bileti Görsel (PNG) Olarak İndir -->
+        <button
+          id="download-ticket-btn"
+          type="button"
+          class="w-full py-3.5 px-5 rounded-2xl font-display font-bold text-sm sm:text-base text-white bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-600 shadow-lg shadow-rose-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Bileti İndir (PNG) 🎟️📥</span>
+        </button>
+
+        <!-- Cevabı Metin Olarak Kopyala -->
+        <button
+          id="copy-answer-btn"
+          type="button"
+          class="w-full py-3 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm text-rose-600 bg-white/90 hover:bg-white border border-rose-200 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Cevabı Metin Olarak Kopyala 📋</span>
+        </button>
+
+        <!-- Alt İkincil Butonlar -->
+        <div class="flex items-center justify-center gap-4 pt-1">
+          <button
+            id="edit-choice-btn"
+            type="button"
+            class="text-xs sm:text-sm font-bold text-slate-600 hover:text-rose-600 transition-colors cursor-pointer"
+          >
+            ✏️ Planı Değiştir
+          </button>
+          <span class="text-slate-300">•</span>
+          <button
+            id="replay-confetti-btn"
+            type="button"
+            class="text-xs sm:text-sm font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer"
+          >
+            🎊 Tekrar Kutla
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BİLDİRİM TOAST MESAJI (alert() yerine) -->
+  <div
+    id="toast-msg"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-slate-800/95 text-white text-xs sm:text-sm font-semibold shadow-xl opacity-0 pointer-events-none transition-all duration-300 translate-y-3 whitespace-nowrap"
+  >
+    Kopyalandı! 💖
+  </div>
+
+  <!-- İNDİRİLEN BİLET ÖNİZLEME MODALI (Tarayıcı/Iframe indirme engellerine karşı kesin çözüm) -->
+  <div
+    id="ticket-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/65 backdrop-blur-sm transition-opacity duration-300"
+  >
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-rose-100 text-center relative animate-float-slow" style="animation: none;">
+      <button
+        id="close-modal-btn"
+        type="button"
+        aria-label="Kapat"
+        class="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-bold flex items-center justify-center transition-colors cursor-pointer"
+      >
+        ✕
+      </button>
+
+      <h3 class="font-display font-extrabold text-slate-800 text-lg sm:text-xl mb-1">
+        Bilet Görselin Hazır! 🎟️💖
+      </h3>
+      <p class="text-xs text-slate-500 mb-3">
+        İndirme başlamadıysa görsele <b>sağ tıklayıp (mobilde basılı tutup)</b> kaydedebilirsin:
+      </p>
+
+      <div class="rounded-2xl overflow-hidden border border-rose-200 shadow-md mb-4 bg-rose-50">
+        <img id="generated-ticket-img" src="" alt="Resmi Date Bileti" class="w-full h-auto block select-all" />
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2.5">
+        <a
+          id="direct-download-link"
+          href="#"
+          download="resmi-date-bileti.png"
+          class="flex-1 py-3 px-4 rounded-xl font-display font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-md transition-all flex items-center justify-center gap-1.5"
+        >
+          <span>Cihaza Kaydet 📥</span>
+        </a>
+        <button
+          id="native-share-btn"
+          type="button"
+          class="hidden flex-1 py-3 px-4 rounded-xl font-display font-bold text-xs sm:text-sm text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <span>Görseli Paylaş 📤</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ==========================================
+      // 1. ARKA PLAN SÜZÜLEN KALPLER OLUŞTURUCU
+      // ==========================================
+      const heartsContainer = document.getElementById('hearts-container');
+      const heartSymbols = ['💖', '💕', '💗', '💓', '🌸', '✨', '❤️'];
+
+      function createFloatingHearts() {
+        const count = window.innerWidth < 640 ? 20 : 30;
+        for (let i = 0; i < count; i++) {
+          const heart = document.createElement('div');
+          heart.className = 'floating-heart';
+          heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+
+          const size = Math.floor(Math.random() * 20) + 14;
+          const left = Math.random() * 100;
+          const duration = (Math.random() * 8 + 7).toFixed(1);
+          const delay = (Math.random() * 10).toFixed(1);
+          const opacity = (Math.random() * 0.45 + 0.25).toFixed(2);
+
+          heart.style.fontSize = `${size}px`;
+          heart.style.left = `${left}vw`;
+          heart.style.setProperty('--duration', `${duration}s`);
+          heart.style.setProperty('--delay', `-${delay}s`);
+          heart.style.setProperty('--max-opacity', opacity);
+
+          heartsContainer.appendChild(heart);
+        }
+      }
+      createFloatingHearts();
+
+      // ==========================================
+      // 2. AŞAMA 1: KAÇAN 'HAYIR' BUTONU VE BÜYÜYEN 'EVET' BUTONU
+      // ==========================================
+      const questionCard = document.getElementById('question-card');
+      const yesBtn = document.getElementById('yes-btn');
+      const noBtn = document.getElementById('no-btn');
+      const escapeHint = document.getElementById('escape-hint');
+      const subPrompt = document.getElementById('sub-prompt');
+
+      const funnyTexts = [
+        'Emin misin? 🥺',
+        'Yanlış tuş!',
+        'Tıklayamazsın ki 😜',
+        'Sistem hatası: Hayır yok!',
+        'Bir daha düşün 💕',
+        'Kaçtı bile 🏃‍♂️💨'
+      ];
+
+      let escapeCount = 0;
+      let yesScale = 1;
+      let isFloatingMode = false;
+
+      function moveNoButton(e) {
+        if (e && e.type === 'touchstart') {
+          e.preventDefault();
+        }
+
+        escapeCount++;
+
+        // Komik metni sırayla değiştir
+        const textIndex = (escapeCount - 1) % funnyTexts.length;
+        noBtn.textContent = funnyTexts[textIndex];
+
+        // İlk kaçışta butonu body seviyesinde fixed pozisyona al
+        if (!isFloatingMode) {
+          const rect = noBtn.getBoundingClientRect();
+          document.body.appendChild(noBtn);
+          noBtn.style.position = 'fixed';
+          noBtn.style.left = `${rect.left}px`;
+          noBtn.style.top = `${rect.top}px`;
+          noBtn.style.margin = '0';
+          isFloatingMode = true;
+          escapeHint.classList.remove('opacity-0');
+        }
+
+        // 'Evet' butonunu her kaçışta biraz daha büyüt
+        if (yesScale < 1.8) {
+          yesScale += 0.1;
+          yesBtn.style.transform = `scale(${yesScale.toFixed(2)})`;
+        }
+
+        if (escapeCount === 4) {
+          subPrompt.textContent = 'Gördüğün gibi evren bile bizim date’e çıkmamızı istiyor! 💫';
+        }
+
+        // Ekran sınırları içinde ve soru kartının üstünü kapatmayacak güvenli konum hesapla
+        requestAnimationFrame(() => {
+          const padding = 18;
+          const btnWidth = noBtn.offsetWidth || 150;
+          const btnHeight = noBtn.offsetHeight || 48;
+
+          const maxX = Math.max(padding, window.innerWidth - btnWidth - padding);
+          const maxY = Math.max(padding, window.innerHeight - btnHeight - padding);
+
+          const currentLeft = parseFloat(noBtn.style.left) || 0;
+          const currentTop = parseFloat(noBtn.style.top) || 0;
+          const cardRect = questionCard.getBoundingClientRect();
+
+          let newX, newY;
+          let attempts = 0;
+
+          do {
+            newX = Math.floor(Math.random() * (maxX - padding + 1)) + padding;
+            newY = Math.floor(Math.random() * (maxY - padding + 1)) + padding;
+            attempts++;
+
+            // Kart başlığıyla çakışmayı önle (mümkün olduğunca kartın dışına veya alt/üst boşluklara at)
+            const overlapsTitle =
+              newX + btnWidth > cardRect.left + 10 &&
+              newX < cardRect.right - 10 &&
+              newY + btnHeight > cardRect.top + 10 &&
+              newY < cardRect.top + cardRect.height * 0.55;
+
+            if (!overlapsTitle && Math.hypot(newX - currentLeft, newY - currentTop) >= 85) {
+              break;
+            }
+          } while (attempts < 20);
+
+          noBtn.style.left = `${newX}px`;
+          noBtn.style.top = `${newY}px`;
+        });
+      }
+
+      noBtn.addEventListener('mouseover', moveNoButton);
+      noBtn.addEventListener('mouseenter', moveNoButton);
+      noBtn.addEventListener('touchstart', moveNoButton, { passive: false });
+      noBtn.addEventListener('click', moveNoButton);
+
+      window.addEventListener('resize', () => {
+        if (!isFloatingMode || noBtn.style.display === 'none') return;
+        const padding = 16;
+        const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+        const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+        const curX = parseFloat(noBtn.style.left) || padding;
+        const curY = parseFloat(noBtn.style.top) || padding;
+        noBtn.style.left = `${Math.min(Math.max(padding, curX), Math.max(padding, maxX))}px`;
+        noBtn.style.top = `${Math.min(Math.max(padding, curY), Math.max(padding, maxY))}px`;
+      });
+
+      // ==========================================
+      // 3. KONFETİ & KALP PATLAMASI ANİMASYONU
+      // ==========================================
+      const confettiCanvas = document.getElementById('confetti-canvas');
+      const ctx = confettiCanvas.getContext('2d');
+      let particles = [];
+      let animationFrameId = null;
+
+      function resizeCanvas() {
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      function launchCelebration() {
+        const colors = ['#f43f5e', '#ec4899', '#fb7185', '#f59e0b', '#a855f7', '#ef4444'];
+        const shapes = ['heart', 'circle', 'rect'];
+
+        for (let i = 0; i < 130; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 11 + 4;
+          particles.push({
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 4,
+            size: Math.random() * 9 + 6,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            shape: shapes[Math.floor(Math.random() * shapes.length)],
+            rotation: Math.random() * 360,
+            rotationSpeed: (Math.random() - 0.5) * 10,
+            alpha: 1
+          });
+        }
+
+        if (!animationFrameId) {
+          animateParticles();
+        }
+      }
+
+      function drawHeart(ctx, x, y, size, color, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        const topCurveHeight = size * 0.3;
+        ctx.moveTo(x, y + topCurveHeight);
+        ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurveHeight);
+        ctx.bezierCurveTo(x - size / 2, y + (size + topCurveHeight) / 2, x, y + (size + topCurveHeight) / 1.4, x, y + size);
+        ctx.bezierCurveTo(x, y + (size + topCurveHeight) / 1.4, x + size / 2, y + (size + topCurveHeight) / 2, x + size / 2, y + topCurveHeight);
+        ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animateParticles() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.25;
+          p.vx *= 0.98;
+          p.rotation += p.rotationSpeed;
+          p.alpha -= 0.011;
+
+          if (p.alpha > 0) {
+            if (p.shape === 'heart') {
+              drawHeart(ctx, p.x, p.y, p.size * 1.4, p.color, p.alpha);
+            } else {
+              ctx.save();
+              ctx.globalAlpha = p.alpha;
+              ctx.translate(p.x, p.y);
+              ctx.rotate((p.rotation * Math.PI) / 180);
+              ctx.fillStyle = p.color;
+              if (p.shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+              } else {
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+              }
+              ctx.restore();
+            }
+          }
+        });
+
+        particles = particles.filter((p) => p.alpha > 0);
+
+        if (particles.length > 0) {
+          animationFrameId = requestAnimationFrame(animateParticles);
+        } else {
+          animationFrameId = null;
+          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+      }
+
+      // ==========================================
+      // 4. KART GEÇİŞ YARDIMCISI & AŞAMA 2 FORMU
+      // ==========================================
+      const selectionCard = document.getElementById('selection-card');
+      const ticketCard = document.getElementById('ticket-card');
+
+      function switchCard(fromCard, toCard) {
+        fromCard.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+          fromCard.classList.add('hidden');
+          toCard.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            toCard.classList.remove('opacity-0', 'scale-95');
+            toCard.classList.add('opacity-100', 'scale-100');
+          });
+        }, 250);
+      }
+
+      // 'Evet' tıklandığında Aşama 2'ye (Nerede & Ne zaman seçimi) geç
+      yesBtn.addEventListener('click', () => {
+        noBtn.style.display = 'none';
+        launchCelebration();
+        switchCard(questionCard, selectionCard);
+      });
+
+      // Hızlı seçim hapları (Nerede)
+      const wherePills = document.querySelectorAll('#where-pills .pill-btn');
+      const whereInput = document.getElementById('where-input');
+      const whereError = document.getElementById('where-error');
+
+      wherePills.forEach((pill) => {
+        pill.addEventListener('click', () => {
+          wherePills.forEach((p) => p.classList.remove('active'));
+          pill.classList.add('active');
+          whereInput.value = pill.dataset.value;
+          whereError.classList.add('hidden');
+          whereInput.focus();
+        });
+      });
+
+      whereInput.addEventListener('input', () => {
+        whereError.classList.add('hidden');
+        // Kullanıcı metni tamamen silerse veya farklılaştırırsa aktif hapı güncelle
+        const val = whereInput.value.trim();
+        wherePills.forEach((p) => {
+          p.classList.toggle('active', p.dataset.value === val);
+        });
+      });
+
+      // Hızlı seçim hapları & Tarih/Saat seçiciler (Ne zaman)
+      const whenPills = document.querySelectorAll('#when-pills .pill-btn');
+      const whenDateInput = document.getElementById('when-date-input');
+      const whenTimeInput = document.getElementById('when-time-input');
+      const whenTextInput = document.getElementById('when-text-input');
+      const whenError = document.getElementById('when-error');
+
+      // Bugünün tarihini minimum tarih olarak ayarla
+      const todayStr = new Date().toISOString().split('T')[0];
+      whenDateInput.setAttribute('min', todayStr);
+
+      function formatTurkishDate(isoDate) {
+        if (!isoDate) return '';
+        const [year, month, day] = isoDate.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
+        return dateObj.toLocaleDateString('tr-TR', {
+          day: 'numeric',
+          month: 'long',
+          weekday: 'long'
+        });
+      }
+
+      function syncDateTimeToText() {
+        const formattedDate = formatTurkishDate(whenDateInput.value);
+        const timeVal = whenTimeInput.value;
+
+        if (formattedDate || timeVal) {
+          whenPills.forEach((p) => p.classList.remove('active'));
+          const parts = [];
+          if (formattedDate) parts.push(formattedDate);
+          if (timeVal) parts.push(`Saat ${timeVal}`);
+          whenTextInput.value = parts.join(', ');
+          whenError.classList.add('hidden');
+        }
+      }
+
+      whenDateInput.addEventListener('change', syncDateTimeToText);
+      whenTimeInput.addEventListener('change', syncDateTimeToText);
+
+      whenPills.forEach((pill) => {
+        pill.addEventListener('click', () => {
+          whenPills.forEach((p) => p.classList.remove('active'));
+          pill.classList.add('active');
+          whenDateInput.value = '';
+          whenTimeInput.value = '';
+          whenTextInput.value = pill.dataset.value;
+          whenError.classList.add('hidden');
+        });
+      });
+
+      whenTextInput.addEventListener('input', () => {
+        whenError.classList.add('hidden');
+        const val = whenTextInput.value.trim();
+        whenPills.forEach((p) => {
+          p.classList.toggle('active', p.dataset.value === val);
+        });
+      });
+
+      // ==========================================
+      // 5. FORM ONAYI VE AŞAMA 3 (RESMİ DATE BİLETİ)
+      // ==========================================
+      const dateChoiceForm = document.getElementById('date-choice-form');
+      const noteInput = document.getElementById('note-input');
+
+      const summaryWhere = document.getElementById('summary-where');
+      const summaryWhen = document.getElementById('summary-when');
+      const summaryNoteRow = document.getElementById('summary-note-row');
+      const summaryNote = document.getElementById('summary-note');
+      const downloadTicketBtn = document.getElementById('download-ticket-btn');
+      const copyAnswerBtn = document.getElementById('copy-answer-btn');
+
+      let formattedShareMessage = '';
+      let currentTicketData = { where: '', when: '', note: '' };
+
+      dateChoiceForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const chosenWhere = whereInput.value.trim();
+        let chosenWhen = whenTextInput.value.trim();
+
+        // Eğer metin kutusu boş ama tarih/saat seçilmişse birleştir
+        if (!chosenWhen && (whenDateInput.value || whenTimeInput.value)) {
+          syncDateTimeToText();
+          chosenWhen = whenTextInput.value.trim();
+        }
+
+        let isValid = true;
+        if (!chosenWhere) {
+          whereError.classList.remove('hidden');
+          isValid = false;
+        }
+        if (!chosenWhen) {
+          whenError.classList.remove('hidden');
+          isValid = false;
+        }
+
+        if (!isValid) {
+          showToast('Lütfen "Nerede" ve "Ne zaman" kısımlarını doldur 💖');
+          return;
+        }
+
+        const chosenNote = noteInput.value.trim();
+        currentTicketData = { where: chosenWhere, when: chosenWhen, note: chosenNote };
+
+        // Bilet özetini doldur
+        summaryWhere.textContent = chosenWhere;
+        summaryWhen.textContent = chosenWhen;
+
+        if (chosenNote) {
+          summaryNote.textContent = chosenNote;
+          summaryNoteRow.classList.remove('hidden');
+        } else {
+          summaryNoteRow.classList.add('hidden');
+        }
+
+        // Kopyalama metnini hazırla
+        formattedShareMessage =
+          `Evet, seninle date'e çıkarım! 😍💖\n\n` +
+          `🎟️ Resmi Date Biletimiz:\n` +
+          `📍 Nerede: ${chosenWhere}\n` +
+          `🗓️ Ne zaman: ${chosenWhen}` +
+          (chosenNote ? `\n💌 Notum: ${chosenNote}` : '') +
+          `\n\nGörüşmek üzere! ✨`;
+
+        // Kutlama ve 3. Aşamaya geçiş
+        launchCelebration();
+        switchCard(selectionCard, ticketCard);
+      });
+
+      // ==========================================
+      // 6. BİLETİ YÜKSEK ÇÖZÜNÜRLÜKLÜ PNG OLARAK İNDİRME
+      // ==========================================
+      const ticketModal = document.getElementById('ticket-modal');
+      const generatedTicketImg = document.getElementById('generated-ticket-img');
+      const directDownloadLink = document.getElementById('direct-download-link');
+      const nativeShareBtn = document.getElementById('native-share-btn');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      let lastGeneratedBlob = null;
+      let lastObjectUrl = null;
+
+      function drawRoundRect(ctx, x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+      }
+
+      function wrapCanvasText(context, text, maxWidth) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0] || '';
+
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = context.measureText(currentLine + ' ' + word).width;
+          if (width < maxWidth) {
+            currentLine += ' ' + word;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
+        return lines;
+      }
+
+      function downloadTicketAsPNG() {
+        try {
+          const canvas = document.createElement('canvas');
+          const scale = 2; // Retina / yüksek çözünürlük
+          const width = 640;
+
+          // Dinamik yükseklik için satırları önceden hesapla
+          const tempCtx = canvas.getContext('2d');
+          tempCtx.font = 'bold 21px sans-serif';
+          const whereLines = wrapCanvasText(tempCtx, currentTicketData.where || 'Özel Buluşma', 460);
+          const whenLines = wrapCanvasText(tempCtx, currentTicketData.when || 'Yakında', 460);
+          const noteLines = currentTicketData.note
+            ? wrapCanvasText(tempCtx, currentTicketData.note, 460)
+            : [];
+
+          const extraLinesCount =
+            Math.max(0, whereLines.length - 1) +
+            Math.max(0, whenLines.length - 1) +
+            (noteLines.length > 0 ? noteLines.length + 1 : 0);
+
+          const height = 430 + extraLinesCount * 28;
+
+          canvas.width = width * scale;
+          canvas.height = height * scale;
+
+          const c = canvas.getContext('2d');
+          c.scale(scale, scale);
+
+          // Dış pastel pembe arka plan
+          const outerGrad = c.createLinearGradient(0, 0, width, height);
+          outerGrad.addColorStop(0, '#ffe4e6');
+          outerGrad.addColorStop(0.5, '#fecdd3');
+          outerGrad.addColorStop(1, '#fde68a');
+          c.fillStyle = outerGrad;
+          c.fillRect(0, 0, width, height);
+
+          // Bilet kartı alanı
+          const pad = 28;
+          const cardW = width - pad * 2;
+          const cardH = height - pad * 2;
+          const radius = 26;
+
+          c.save();
+          drawRoundRect(c, pad, pad, cardW, cardH, radius);
+          const cardGrad = c.createLinearGradient(pad, pad, width - pad, height - pad);
+          cardGrad.addColorStop(0, '#fff1f2');
+          cardGrad.addColorStop(0.5, '#ffffff');
+          cardGrad.addColorStop(1, '#fffbeb');
+          c.fillStyle = cardGrad;
+          c.shadowColor = 'rgba(225, 29, 72, 0.16)';
+          c.shadowBlur = 24;
+          c.shadowOffsetY = 10;
+          c.fill();
+          c.restore();
+
+          // Kesikli iç çerçeve
+          c.save();
+          drawRoundRect(c, pad + 10, pad + 10, cardW - 20, cardH - 20, radius - 6);
+          c.strokeStyle = '#fda4af';
+          c.lineWidth = 2.5;
+          c.setLineDash([8, 6]);
+          c.stroke();
+          c.restore();
+
+          // Sağ ve sol bilet çentikleri
+          c.fillStyle = '#fecdd3';
+          c.beginPath();
+          c.arc(pad, height / 2, 16, 0, Math.PI * 2);
+          c.fill();
+          c.beginPath();
+          c.arc(width - pad, height / 2, 16, 0, Math.PI * 2);
+          c.fill();
+
+          // Üst başlık metinleri
+          c.fillStyle = '#f43f5e';
+          c.font = '800 13px sans-serif';
+          c.fillText('VIP DATE PASS', pad + 34, pad + 52);
+
+          c.fillStyle = '#1e293b';
+          c.font = '800 28px sans-serif';
+          c.fillText('Resmi Date Bileti 💕', pad + 34, pad + 84);
+
+          // ONAYLANDI damgası
+          c.save();
+          c.translate(width - pad - 108, pad + 62);
+          c.rotate((-8 * Math.PI) / 180);
+          c.strokeStyle = '#e11d48';
+          c.lineWidth = 2.5;
+          drawRoundRect(c, -64, -18, 128, 36, 8);
+          c.stroke();
+          c.fillStyle = '#e11d48';
+          c.font = '800 13px sans-serif';
+          c.textAlign = 'center';
+          c.fillText('ONAYLANDI 💖', 0, 5);
+          c.restore();
+
+          // Üst ayırıcı çizgi
+          c.strokeStyle = '#ffe4e6';
+          c.lineWidth = 2;
+          c.beginPath();
+          c.moveTo(pad + 34, pad + 106);
+          c.lineTo(width - pad - 34, pad + 106);
+          c.stroke();
+
+          // Detay satırları
+          let curY = pad + 146;
+
+          // NEREDE
+          c.font = '24px sans-serif';
+          c.fillText('📍', pad + 34, curY + 4);
+          c.fillStyle = '#94a3b8';
+          c.font = '800 12px sans-serif';
+          c.fillText('NEREDE', pad + 72, curY - 8);
+          c.fillStyle = '#1e293b';
+          c.font = '800 21px sans-serif';
+          whereLines.forEach((line, idx) => {
+            c.fillText(line, pad + 72, curY + 18 + idx * 26);
+          });
+          curY += 36 + whereLines.length * 26;
+
+          // NE ZAMAN
+          c.font = '24px sans-serif';
+          c.fillText('🗓️', pad + 34, curY + 4);
+          c.fillStyle = '#94a3b8';
+          c.font = '800 12px sans-serif';
+          c.fillText('NE ZAMAN', pad + 72, curY - 8);
+          c.fillStyle = '#1e293b';
+          c.font = '800 21px sans-serif';
+          whenLines.forEach((line, idx) => {
+            c.fillText(line, pad + 72, curY + 18 + idx * 26);
+          });
+          curY += 36 + whenLines.length * 26;
+
+          // NOT (varsa)
+          if (noteLines.length > 0) {
+            c.font = '24px sans-serif';
+            c.fillText('💌', pad + 34, curY + 4);
+            c.fillStyle = '#94a3b8';
+            c.font = '800 12px sans-serif';
+            c.fillText('NOTUN', pad + 72, curY - 8);
+            c.fillStyle = '#334155';
+            c.font = '700 19px sans-serif';
+            noteLines.forEach((line, idx) => {
+              c.fillText(line, pad + 72, curY + 18 + idx * 25);
+            });
+          }
+
+          // Alt bilgi çizgisi
+          const footerY = height - pad - 34;
+          c.strokeStyle = '#ffe4e6';
+          c.lineWidth = 2;
+          c.beginPath();
+          c.moveTo(pad + 34, footerY - 22);
+          c.lineTo(width - pad - 34, footerY - 22);
+          c.stroke();
+
+          c.fillStyle = '#e11d48';
+          c.font = '700 13px sans-serif';
+          c.fillText('Geçerlilik: İkimiz İçin Özel ✨', pad + 34, footerY);
+          c.textAlign = 'right';
+          c.fillText('İptal Edilemez 🔒', width - pad - 34, footerY);
+
+          const dataUrl = canvas.toDataURL('image/png');
+          generatedTicketImg.src = dataUrl;
+          directDownloadLink.href = dataUrl;
+
+          // Blob oluştur ve indirmeyi tetikle
+          canvas.toBlob((blob) => {
+            if (!blob) return;
+            lastGeneratedBlob = blob;
+
+            if (lastObjectUrl) {
+              URL.revokeObjectURL(lastObjectUrl);
+            }
+            lastObjectUrl = URL.createObjectURL(blob);
+            directDownloadLink.href = lastObjectUrl;
+
+            // Mobil Web Share API desteği varsa paylaş butonunu göster
+            const file = new File([blob], 'resmi-date-bileti.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              nativeShareBtn.classList.remove('hidden');
+              nativeShareBtn.classList.add('flex');
+            }
+
+            // Programatik indirme denemesi
+            const tempLink = document.createElement('a');
+            tempLink.download = 'resmi-date-bileti.png';
+            tempLink.href = lastObjectUrl;
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+          }, 'image/png');
+
+          // Önizleme modalını aç (iframe/mobil ortamlarda görseli doğrudan kaydedebilmek için)
+          ticketModal.classList.remove('hidden');
+          ticketModal.classList.add('flex');
+          showToast('Bilet görselin oluşturuldu! 🎟️💖');
+        } catch (err) {
+          console.error('Bilet oluşturma hatası:', err);
+          showToast('Bilet oluşturulurken bir hata oluştu.');
+        }
+      }
+
+      downloadTicketBtn.addEventListener('click', downloadTicketAsPNG);
+
+      closeModalBtn.addEventListener('click', () => {
+        ticketModal.classList.add('hidden');
+        ticketModal.classList.remove('flex');
+      });
+
+      ticketModal.addEventListener('click', (e) => {
+        if (e.target === ticketModal) {
+          ticketModal.classList.add('hidden');
+          ticketModal.classList.remove('flex');
+        }
+      });
+
+      nativeShareBtn.addEventListener('click', async () => {
+        if (!lastGeneratedBlob) return;
+        try {
+          const file = new File([lastGeneratedBlob], 'resmi-date-bileti.png', { type: 'image/png' });
+          await navigator.share({
+            title: 'Resmi Date Biletimiz 💖',
+            text: formattedShareMessage,
+            files: [file]
+          });
+        } catch (err) {
+          // Kullanıcı paylaşımı iptal ettiyse sessiz kal
+        }
+      });
+
+      // ==========================================
+      // 7. KOPYALAMA, DÜZENLEME VE TOAST BİLDİRİMİ
+      // ==========================================
+      function showToast(message) {
+        const toast = document.getElementById('toast-msg');
+        toast.textContent = message;
+        toast.classList.remove('opacity-0', 'translate-y-3');
+        toast.classList.add('opacity-100', 'translate-y-0');
+
+        setTimeout(() => {
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', 'translate-y-3');
+        }, 2800);
+      }
+
+      function copyTextToClipboard(text, successMessage) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast(successMessage);
+        } catch (err) {
+          showToast('Kopyalama başarısız oldu.');
+        }
+        document.body.removeChild(textArea);
+      }
+
+      copyAnswerBtn.addEventListener('click', () => {
+        copyTextToClipboard(formattedShareMessage, 'Kopyalandı! Şimdi sohbete yapıştırıp gönderebilirsin 💖');
+      });
+
+      document.getElementById('edit-choice-btn').addEventListener('click', () => {
+        switchCard(ticketCard, selectionCard);
+      });
+
+      document.getElementById('replay-confetti-btn').addEventListener('click', launchCelebration);
+    });
+  </script>
+</body>
+</html>
